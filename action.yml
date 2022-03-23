@@ -1,0 +1,13 @@
+name: 'DiffMasterFlex'
+author: 'selfagency'
+description: 'Get a list of files that differ between the specified commit and Git ref'
+branding:
+  icon: 'layers'
+  color: 'blue'
+inputs:
+  sha:
+    description: 'SHA against which to diff'
+    required: true
+runs:
+  using: 'node16'
+  main: 'dist/index.cjs'
