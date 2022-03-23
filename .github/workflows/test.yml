@@ -1,0 +1,16 @@
+name: Release
+on:
+  push:
+    branches:
+      - main
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v2
+        with:
+          fetch-depth: 0
+      - name: Diff
+        id: diff
+        uses: 'selfagency/diffmasterflex@v1.0.0'

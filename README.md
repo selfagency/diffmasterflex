@@ -2,6 +2,18 @@
 
 Get a list of files that differ between the specified commit and Git ref.
 
+## Setup
+
+Checkout your repo with a `fetch-depth` of `0`. Then it's as simple as:
+
+```
+  # ...
+    steps:
+      - id: diff
+        uses: 'selfagency/diffmasterflex@v1.0.1'
+  # ...
+```
+
 ## Options
 
 - `sha`: The SHA of the commit to compare against. Defaults to HEAD of the
@@ -16,18 +28,18 @@ Get a list of files that differ between the specified commit and Git ref.
 ## Example
 
 ```
-name: My Workflow
-
 jobs:
   diff:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
         uses: 'actions/checkout@v2'
+        with:
+          fetch-depth: 0
 
-      - name: Diff against `main`
+      - name: Diff against `master`
         id: diff
-        uses: 'selfagency/diffmasterflex@1.0.0'
+        uses: 'selfagency/diffmasterflex@v1.0.1'
         with:
           ref: 'origin/master'
 

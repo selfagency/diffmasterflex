@@ -7,7 +7,19 @@ branding:
 inputs:
   sha:
     description: 'SHA against which to diff'
-    required: true
+    required: false
+    type: string
+  ref:
+    description: 'Git ref against which to diff'
+    required: false
+    type: string
+outputs:
+  changed:
+    description: Whether there were any changes
+    type: boolean
+  diff:
+    description: List of changed files
+    type: string
 runs:
   using: 'node16'
   main: 'dist/index.cjs'
