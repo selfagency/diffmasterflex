@@ -10,7 +10,7 @@ Checkout your repo with a `fetch-depth` of `0`. Then it's as simple as:
   # ...
     steps:
       - id: diff
-        uses: 'selfagency/diffmasterflex@v1.0.1'
+        uses: 'selfagency/diffmasterflex@v1.0.2'
   # ...
 ```
 
@@ -39,7 +39,7 @@ jobs:
 
       - name: Diff against `master`
         id: diff
-        uses: 'selfagency/diffmasterflex@v1.0.1'
+        uses: 'selfagency/diffmasterflex@v1.0.2'
         with:
           ref: 'origin/master'
 

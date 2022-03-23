@@ -1,7 +1,7 @@
 import core from '@actions/core';
 import { run } from './util';
 
-export default async () => {
+const action = async () => {
   try {
     // get environment variables
     const { REF = 'origin/main', SHA, GITHUB_SHA } = process.env;
@@ -45,3 +45,5 @@ export default async () => {
     core.setFailed((<Error>error).message);
   }
 };
+
+(async () => await action())();
