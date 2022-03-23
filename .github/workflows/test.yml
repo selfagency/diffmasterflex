@@ -11,6 +11,12 @@ jobs:
         uses: actions/checkout@v2
         with:
           fetch-depth: 0
+
       - name: Diff
         id: diff
         uses: 'selfagency/diffmasterflex@v1.0.0'
+
+      - run: |
+          echo ${{ steps.diff.outputs.changed }}
+          echo ${{ steps.diff.outputs.diff }}
+
