@@ -5,6 +5,9 @@ const action = async () => {
   try {
     // get environment variables
     const { REF = 'origin/main', SHA, GITHUB_SHA } = process.env;
+    core.debug(`ref: ${REF}`);
+    core.debug(`sha: ${SHA}`);
+    core.debug(`github sha: ${GITHUB_SHA}`);
 
     let commit = '';
 
@@ -16,18 +19,19 @@ const action = async () => {
     } else {
       commit = await run('git', ['rev-parse', 'HEAD']);
     }
+    core.debug(`commit: ${commit}`);
 
     // get the HEAD of the main branch
     const main = (await run('git', ['log', REF])).split('\n')[0].split(' ')[1];
-    // core.info(main);
+    core.debug(`main: ${main}`);
 
     // diff step 1
     const base = await run('git', ['merge-base', main, commit]);
-    // core.info(base);
+    core.debug(`base: ${base}`);
 
     // diff step 2
     const tree = await run('git', ['merge-tree', base, main, commit]);
-    // core.info(tree);
+    core.debug(`tree: ${tree}`);
 
     // diff step 3
     const filters = /^ {2}our|^ {2}their/;
@@ -37,8 +41,8 @@ const action = async () => {
       .filter(line => filters.test(line))
       .map(line => line.replace(/\s+/g, ' ').split(' ')[4])
       .join(' ');
+    core.debug(`diff: ${diff}`);
 
-    core.info(diff);
     core.setOutput('diff', diff);
     core.setOutput('changed', diff.trim().length > 0);
   } catch (error) {
