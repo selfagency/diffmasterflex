@@ -24,10 +24,6 @@ var __spreadProps = (a, b) => __defProps(a, __getOwnPropDescs(b));
 var __commonJS = (cb, mod) => function __require() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
 };
-var __export = (target, all) => {
-  for (var name in all)
-    __defProp(target, name, { get: all[name], enumerable: true });
-};
 var __copyProps = (to, from, except, desc) => {
   if (from && typeof from === "object" || typeof from === "function") {
     for (let key of __getOwnPropNames(from))
@@ -37,7 +33,6 @@ var __copyProps = (to, from, except, desc) => {
   return to;
 };
 var __toESM = (mod, isNodeMode, target) => (target = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(isNodeMode || !mod || !mod.__esModule ? __defProp(target, "default", { value: mod, enumerable: true }) : target, mod));
-var __toCommonJS = (mod) => __copyProps(__defProp({}, "__esModule", { value: true }), mod);
 
 // node_modules/@actions/core/lib/utils.js
 var require_utils = __commonJS({
@@ -2364,11 +2359,6 @@ var require_exec = __commonJS({
 });
 
 // src/action.ts
-var action_exports = {};
-__export(action_exports, {
-  default: () => action_default
-});
-module.exports = __toCommonJS(action_exports);
 var import_core2 = __toESM(require_core(), 1);
 
 // src/util.ts
@@ -2415,9 +2405,12 @@ var run = async (command, args) => {
 };
 
 // src/action.ts
-var action_default = async () => {
+var action = async () => {
   try {
     const { REF = "origin/main", SHA, GITHUB_SHA } = process.env;
+    import_core2.default.debug(`ref: ${REF}`);
+    import_core2.default.debug(`sha: ${SHA}`);
+    import_core2.default.debug(`github sha: ${GITHUB_SHA}`);
     let commit = "";
     if (SHA) {
       commit = SHA;
@@ -2426,17 +2419,22 @@ var action_default = async () => {
     } else {
       commit = await run("git", ["rev-parse", "HEAD"]);
     }
+    import_core2.default.debug(`commit: ${commit}`);
     const main = (await run("git", ["log", REF])).split("\n")[0].split(" ")[1];
+    import_core2.default.debug(`main: ${main}`);
     const base = await run("git", ["merge-base", main, commit]);
+    import_core2.default.debug(`base: ${base}`);
     const tree = await run("git", ["merge-tree", base, main, commit]);
+    import_core2.default.debug(`tree: ${tree}`);
     const filters = /^ {2}our|^ {2}their/;
     const diff = tree.split("\n").filter((line) => filters.test(line)).map((line) => line.replace(/\s+/g, " ").split(" ")[4]).join(" ");
-    import_core2.default.info(diff);
+    import_core2.default.debug(`diff: ${diff}`);
     import_core2.default.setOutput("diff", diff);
     import_core2.default.setOutput("changed", diff.trim().length > 0);
   } catch (error) {
     import_core2.default.setFailed(error.message);
   }
 };
-// Annotate the CommonJS export names for ESM import in node:
-0 && (module.exports = {});
+(async () => {
+  await action();
+})();

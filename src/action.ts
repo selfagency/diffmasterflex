@@ -50,4 +50,6 @@ const action = async () => {
   }
 };
 
-(async () => await action())();
+(async () => {
+  await action();
+})();
