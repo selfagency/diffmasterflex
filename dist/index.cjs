@@ -2407,20 +2407,22 @@ var run = async (command, args) => {
 // src/action.ts
 var action = async () => {
   try {
-    const { REF = "origin/main", SHA, GITHUB_SHA } = process.env;
-    import_core2.default.debug(`ref: ${REF}`);
-    import_core2.default.debug(`sha: ${SHA}`);
+    const { GITHUB_SHA } = process.env;
+    const ref = import_core2.default.getInput("ref") || "origin/main";
+    const sha = import_core2.default.getInput("sha");
+    import_core2.default.debug(`ref: ${ref}`);
+    import_core2.default.debug(`sha: ${sha}`);
     import_core2.default.debug(`github sha: ${GITHUB_SHA}`);
     let commit = "";
-    if (SHA) {
-      commit = SHA;
+    if (sha) {
+      commit = sha;
     } else if (GITHUB_SHA) {
       commit = GITHUB_SHA;
     } else {
       commit = await run("git", ["rev-parse", "HEAD"]);
     }
     import_core2.default.debug(`commit: ${commit}`);
-    const main = (await run("git", ["log", REF])).split("\n")[0].split(" ")[1];
+    const main = (await run("git", ["log", ref])).split("\n")[0].split(" ")[1];
     import_core2.default.debug(`main: ${main}`);
     const base = await run("git", ["merge-base", main, commit]);
     import_core2.default.debug(`base: ${base}`);

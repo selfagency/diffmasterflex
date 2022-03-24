@@ -4,16 +4,18 @@ import { run } from './util';
 const action = async () => {
   try {
     // get environment variables
-    const { REF = 'origin/main', SHA, GITHUB_SHA } = process.env;
-    core.debug(`ref: ${REF}`);
-    core.debug(`sha: ${SHA}`);
+    const { GITHUB_SHA } = process.env;
+    const ref = core.getInput('ref') || 'origin/main';
+    const sha = core.getInput('sha');
+    core.debug(`ref: ${ref}`);
+    core.debug(`sha: ${sha}`);
     core.debug(`github sha: ${GITHUB_SHA}`);
 
     let commit = '';
 
     // get the commit
-    if (SHA) {
-      commit = SHA;
+    if (sha) {
+      commit = sha;
     } else if (GITHUB_SHA) {
       commit = GITHUB_SHA;
     } else {
@@ -22,7 +24,7 @@ const action = async () => {
     core.debug(`commit: ${commit}`);
 
     // get the HEAD of the main branch
-    const main = (await run('git', ['log', REF])).split('\n')[0].split(' ')[1];
+    const main = (await run('git', ['log', ref])).split('\n')[0].split(' ')[1];
     core.debug(`main: ${main}`);
 
     // diff step 1
