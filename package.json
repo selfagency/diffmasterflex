@@ -1,6 +1,6 @@
 {
   "name": "DiffMasterFlex",
-  "version": "1.0.2",
+  "version": "1.0.3",
   "description": "Get a list of files that differ between the specified commit and Git ref",
   "repository": {
     "type": "git",
