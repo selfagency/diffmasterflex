@@ -1,7 +1,7 @@
-import core from '@actions/core';
-import { run } from './util';
+import * as core from '@actions/core';
+import { run } from './util.js';
 
-const action = async () => {
+export const action = async () => {
   try {
     // get environment variables
     const { GITHUB_SHA } = process.env;

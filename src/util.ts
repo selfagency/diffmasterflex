@@ -1,4 +1,4 @@
-import core from '@actions/core';
+import * as core from '@actions/core';
 import { exec } from '@actions/exec';
 
 const errorOut = (data: string | Error, hideWarning = false) => {
@@ -52,4 +52,5 @@ const run = async (command: string, args: string[]) => {
   }
 };
 
-export { run, errorOut };
+export { errorOut, run };
+

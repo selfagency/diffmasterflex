@@ -1,6 +1,6 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
-
-npm run bundle
+eval $(/opt/homebrew/bin/fnm env)
+fnm use
+pnpm run lint-staged
+pnpm run build
 git add dist
-npm run lint-staged

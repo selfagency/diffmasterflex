@@ -1,5 +1,5 @@
 {
-  "name": "DiffMasterFlex",
+  "name": "diffmasterflex",
   "version": "1.0.4",
   "description": "Get a list of files that differ between the specified commit and Git ref",
   "repository": {
@@ -9,53 +9,46 @@
   "license": "MIT",
   "author": "Daniel Sieradski <daniel@self.agency>",
   "type": "module",
-  "main": "dist/index.js",
+  "main": "dist/action.js",
   "scripts": {
-    "build": "tsc --project .",
+    "build": "tsup src/action.ts --format cjs --out-dir dist",
+    "format": "oxfmt --write",
+    "lint": "tsc --noEmit && oxlint",
+    "lint-staged": "lint-staged --allow-empty",
+    "lint:fix": "oxlint --fix",
     "prepare": "husky install",
-    "start": "node dist/index.cjs",
-    "bundle": "rm -rf dist; esbuild src/action.ts --bundle --platform=node --target=node16 --outfile=dist/index.cjs",
-    "lint": "tsc --noEmit && eslint src/. && prettier --check src/.",
-    "lint-staged": "lint-staged --allow-empty"
+    "start": "node dist/action.cjs",
+    "test": "vitest --run",
+    "tsc:check": "tsc --noEmit"
   },
   "lint-staged": {
-    "*.{js,json,md,yml}": [
-      "eslint --fix",
-      "prettier --write"
+    "*.{ts}": [
+      "pnpm tsc:check --types node --esModuleInterop --target esnext --module nodenext"
+    ],
+    "*.{ts,js,json,md,yml}": [
+      "pnpm lint:fix",
+      "pnpm format"
     ]
   },
   "dependencies": {
-    "@actions/core": "^1.10.0",
-    "@actions/exec": "^1.1.1",
-    "dayjs": "^1.11.5",
-    "html-to-text": "^8.2.1",
-    "linkedom": "^0.14.17",
-    "node-fetch": "^3.2.10",
-    "object-sha": "^2.0.7",
+    "@actions/core": "3.0.0",
+    "@actions/exec": "3.0.0",
+    "dayjs": "^1.11.19",
+    "html-to-text": "9.0.5",
+    "linkedom": "^0.18.12",
+    "node-fetch": "^3.3.2",
+    "object-sha": "^2.1.1",
     "rss-to-json": "^2.1.1",
     "showdown": "^2.1.0",
     "striptags": "^3.2.0"
   },
   "devDependencies": {
-    "@types/html-to-text": "^8.1.1",
-    "@types/node": "^18.11.2",
-    "@types/showdown": "^2.0.0",
-    "@typescript-eslint/eslint-plugin": "^5.40.1",
-    "@typescript-eslint/parser": "^5.40.1",
-    "esbuild": "^0.25.0",
-    "eslint": "^8.25.0",
-    "eslint-config-prettier": "^8.5.0",
-    "eslint-config-standard": "^17.0.0",
-    "eslint-plugin-import": "^2.26.0",
-    "eslint-plugin-json": "^3.1.0",
-    "eslint-plugin-markdown": "^3.0.0",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.1.0",
-    "eslint-plugin-yml": "^1.2.0",
-    "eslint-scope": "^7.1.1",
-    "husky": "^8.0.1",
-    "lint-staged": "^13.0.3",
-    "prettier": "^2.7.1",
-    "typescript": "^4.8.4"
+    "@types/html-to-text": "9.0.4",
+    "@types/node": "25.3.0",
+    "@types/showdown": "^2.0.6",
+    "husky": "9.1.7",
+    "lint-staged": "16.2.7",
+    "typescript": "5.9.3",
+    "vitest": "^4.0.18"
   }
 }
