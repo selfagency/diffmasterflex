@@ -53,5 +53,6 @@ jobs:
         run: pnpm run build
       - name: Run tests
         run: pnpm test -- --run
-      - name: Bundle
-        run: pnpm run bundle
+      - name: Bundle (build artifact)
+        # 'bundle' script was missing in package.json; run the existing build step instead
+        run: pnpm run build
