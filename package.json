@@ -1,6 +1,6 @@
 {
   "name": "diffmasterflex",
-  "version": "1.0.4",
+  "version": "2.0.0",
   "description": "Get a list of files that differ between the specified commit and Git ref",
   "license": "MIT",
   "author": "Daniel Sieradski <daniel@self.agency>",

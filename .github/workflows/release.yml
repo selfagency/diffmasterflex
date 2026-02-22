@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - main
+  workflow_dispatch:
 jobs:
   release:
     runs-on: ubuntu-latest
@@ -18,11 +19,11 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v6
         with:
-          node-version: "22"
+          node-version: '22'
 
       - name: Check package version
         id: check
-        uses: "EndBug/version-check@v2"
+        uses: 'EndBug/version-check@v2'
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           diff-search: true
@@ -62,8 +63,8 @@ jobs:
         uses: softprops/action-gh-release@v1
         if: ${{ steps.check.outputs.changed == 'true' }}
         with:
-          tag_name: "v${{ steps.check.outputs.version }}"
-          name: "v${{ steps.check.outputs.version }}"
+          tag_name: 'v${{ steps.check.outputs.version }}'
+          name: 'v${{ steps.check.outputs.version }}'
           body: ${{ steps.generate_changelog.outputs.changelog }}
           files: ${{ steps.write_changelog.outputs.changelog_file }}
         env:

@@ -6,12 +6,12 @@ Get a list of files that differ between the specified commit and Git ref.
 
 Checkout your repo with a `fetch-depth` of `0`. Then it's as simple as:
 
-```
-  # ...
-    steps:
-      - id: diff
-        uses: 'selfagency/diffmasterflex@v1'
-  # ...
+```yaml
+# ...
+steps:
+  - id: diff
+    uses: 'selfagency/diffmasterflex@v1'
+# ...
 ```
 
 ## Options
@@ -27,7 +27,7 @@ Checkout your repo with a `fetch-depth` of `0`. Then it's as simple as:
 
 ## Example
 
-```
+```yaml
 jobs:
   diff:
     runs-on: ubuntu-latest
@@ -37,28 +37,27 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Diff against `master`
+      - name: Diff against `main`
         id: diff
-        uses: 'selfagency/diffmasterflex@v1'
+        uses: 'selfagency/diffmasterflex@v2'
         with:
-          ref: 'origin/master'
+          ref: 'origin/main'
 
       - name: Check for changes
         id: changes
         if: ${{ steps.diff.outputs.changed == 'true' }}
-        run:
-          DIFF="${{ steps.diff.outputs.diff }}"
+        run: DIFF="${{ steps.diff.outputs.diff }}"
 
           if [[ $DIFF =~ "backend" ]]; then
-            BACKEND="true"
+          BACKEND="true"
           else
-            BACKEND="false"
+          BACKEND="false"
           fi
 
           if [[ $DIFF =~ "frontend" ]]; then
-            FRONTEND="true"
+          FRONTEND="true"
           else
-            FRONTEND="false"
+          FRONTEND="false"
           fi
 
           echo "backend=${BACKEND}" >> "${GITHUB_OUTPUT}"
