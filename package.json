@@ -2,12 +2,12 @@
   "name": "diffmasterflex",
   "version": "1.0.4",
   "description": "Get a list of files that differ between the specified commit and Git ref",
+  "license": "MIT",
+  "author": "Daniel Sieradski <daniel@self.agency>",
   "repository": {
     "type": "git",
     "url": "https://github.com/selfagency/slackfeedbot.git"
   },
-  "license": "MIT",
-  "author": "Daniel Sieradski <daniel@self.agency>",
   "type": "module",
   "main": "dist/action.js",
   "scripts": {
@@ -20,15 +20,6 @@
     "start": "node dist/action.cjs",
     "test": "vitest --run",
     "tsc:check": "tsc --noEmit"
-  },
-  "lint-staged": {
-    "*.{ts}": [
-      "pnpm tsc:check --types node --esModuleInterop --target esnext --module nodenext"
-    ],
-    "*.{ts,js,json,md,yml}": [
-      "pnpm lint:fix",
-      "pnpm format"
-    ]
   },
   "dependencies": {
     "@actions/core": "3.0.0",
@@ -48,7 +39,18 @@
     "@types/showdown": "^2.0.6",
     "husky": "9.1.7",
     "lint-staged": "16.2.7",
+    "oxlint-tsgolint": "^0.14.2",
+    "tsup": "^8.5.1",
     "typescript": "5.9.3",
     "vitest": "^4.0.18"
+  },
+  "lint-staged": {
+    "*.{ts}": [
+      "pnpm tsc:check --types node --esModuleInterop --target esnext --module nodenext"
+    ],
+    "*.{ts,js,json,md,yml}": [
+      "pnpm lint:fix",
+      "pnpm format"
+    ]
   }
 }

@@ -1,4 +1,2 @@
 #!/bin/sh
-eval $(/opt/homebrew/bin/fnm env)
-fnm use
 pnpm i

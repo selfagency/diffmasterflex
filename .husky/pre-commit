@@ -1,6 +1,4 @@
 #!/bin/sh
-eval $(/opt/homebrew/bin/fnm env)
-fnm use
 pnpm run lint-staged
 pnpm run build
 git add dist
