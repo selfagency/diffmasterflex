@@ -8,14 +8,19 @@ vi.mock('@actions/core', () => ({
   debug: vi.fn()
 }));
 
-// mock @actions/exec so we can simulate command output
-vi.mock('@actions/exec', () => ({
-  exec: vi.fn(async (command: string, args: string[], opts: any) => {
-    // simulate listeners writing to stdout/stderr
-    const listeners = opts?.listeners || {};
-    if (listeners.stdout) listeners.stdout(Buffer.from('out-line\n'));
-    if (listeners.stderr) listeners.stderr(Buffer.from('err-line\n'));
-    return Promise.resolve(0);
+// mock child_process.spawn so we can simulate command output
+vi.mock('child_process', () => ({
+  spawn: vi.fn((command: string, args: string[]) => {
+    // simple fake child process with stdout/stderr streams and event handlers
+    const stdout = { on: (ev: string, cb: Function) => { if (ev === 'data') cb(Buffer.from('out-line\n')); } };
+    const stderr = { on: (ev: string, cb: Function) => { if (ev === 'data') cb(Buffer.from('err-line\n')); } };
+    return {
+      stdout,
+      stderr,
+      on: (ev: string, cb: Function) => {
+        if (ev === 'close') cb(0);
+      }
+    } as any;
   })
 }));
 
@@ -33,9 +38,9 @@ describe('util.run', () => {
   });
 
   it('returns empty string on exec rejection', async () => {
-    const { exec } = await import('@actions/exec');
-    // make exec throw for this test
-    (exec as any).mockImplementationOnce(async () => { throw new Error('boom'); });
+    const { spawn } = await import('child_process');
+    // make spawn throw for this test
+    (spawn as any).mockImplementationOnce(() => { throw new Error('boom'); });
     const out = await run('badcmd', ['--fail']);
     expect(out).toBe('');
   });
