@@ -1,0 +1,46 @@
+name: Test Action outputs
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+  workflow_dispatch: {}
+
+jobs:
+  test-action:
+    name: Run action and validate outputs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository (full history)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Run the action
+        id: run_action
+        uses: ./
+        with:
+          # Use the main ref as a stable reference for the test
+          ref: origin/main
+
+      - name: Validate outputs
+        run: |
+          DIFF='${{ steps.run_action.outputs.diff }}'
+          CHANGED='${{ steps.run_action.outputs.changed }}'
+
+          echo "diff='$DIFF'"
+          echo "changed='$CHANGED'"
+
+          # changed must be either 'true' or 'false'
+          if [ "$CHANGED" != "true" ] && [ "$CHANGED" != "false" ]; then
+            echo "ERROR: unexpected 'changed' output: '$CHANGED'"
+            exit 1
+          fi
+
+          # diff should be present (may be empty string) -- exit non-zero only if unset
+          if [ "${DIFF+set}" != "set" ]; then
+            echo "ERROR: 'diff' output not set"
+            exit 1
+          fi
+
+          echo "Action outputs are present and valid."
