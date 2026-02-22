@@ -10,7 +10,7 @@ Checkout your repo with a `fetch-depth` of `0`. Then it's as simple as:
 # ...
 steps:
   - id: diff
-    uses: 'selfagency/diffmasterflex@v1'
+    uses: 'selfagency/diffmasterflex@v2'
 # ...
 ```
 
@@ -33,7 +33,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repo
-        uses: 'actions/checkout@v2'
+        uses: 'actions/checkout@v6'
         with:
           fetch-depth: 0
 
