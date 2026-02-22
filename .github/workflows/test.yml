@@ -1,12 +1,10 @@
 name: CI - lint & tests
-permissions:
-  contents: read
 
 on:
   push:
-    branches: [ main ]
+    branches: [main]
   pull_request:
-    branches: [ main ]
+    branches: [main]
 
 permissions:
   contents: read

@@ -1,5 +1,5 @@
 import * as core from '@actions/core';
-import { exec } from '@actions/exec';
+import { spawn } from 'child_process';
 
 const errorOut = (data: string | Error, hideWarning = false) => {
   console.log(data);
@@ -26,24 +26,41 @@ const errorOut = (data: string | Error, hideWarning = false) => {
   }
 };
 
+const isSafeToken = (s: string) => /^[a-zA-Z0-9._/-]+$/.test(s);
+
 const run = async (command: string, args: string[]) => {
   let output = '';
 
+  // Basic validation to avoid shell-injection via command or args
+  if (!isSafeToken(command)) {
+    throw new Error(`Unsafe command detected: ${command}`);
+  }
+  for (const a of args) {
+    if (typeof a !== 'string' || !isSafeToken(a)) {
+      throw new Error(`Unsafe argument detected: ${a}`);
+    }
+  }
+
   try {
-    await exec(command, args, {
-      silent: true,
-      listeners: {
-        stdout: (data: Buffer) => {
-          output += data.toString();
-        },
-        stderr: (data: Buffer) => {
-          output += data.toString();
-        },
-        errline: (data: string) => {
-          errorOut(data, command === 'yarn');
-        }
-      }
+    // Use spawn to avoid running a shell; spawn does not use a shell by default
+    const child = spawn(command, args, { shell: false });
+
+    child.stdout?.on('data', (data: Buffer) => {
+      output += data.toString();
     });
+    child.stderr?.on('data', (data: Buffer) => {
+      output += data.toString();
+    });
+
+    const exitCode: number = await new Promise((resolve, reject) => {
+      child.on('error', err => reject(err));
+      child.on('close', code => resolve(code ?? 0));
+    });
+
+    if (exitCode !== 0) {
+      // Mimic previous behavior: surface errors via errorOut
+      errorOut(output, command === 'yarn');
+    }
 
     return output.trim();
   } catch (error) {
@@ -53,4 +70,3 @@ const run = async (command: string, args: string[]) => {
 };
 
 export { errorOut, run };
-
