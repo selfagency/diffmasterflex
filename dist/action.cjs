@@ -37,7 +37,7 @@ var core2 = __toESM(require("@actions/core"), 1);
 
 // src/util.ts
 var core = __toESM(require("@actions/core"), 1);
-var import_exec = require("@actions/exec");
+var import_child_process = require("child_process");
 var errorOut = (data, hideWarning = false) => {
   console.log(data);
   if (typeof data === "object" && data?.message) data = data?.message;
@@ -52,23 +52,32 @@ var errorOut = (data, hideWarning = false) => {
     }
   }
 };
+var isSafeToken = (s) => /^[a-zA-Z0-9._/-]+$/.test(s);
 var run = async (command, args) => {
   let output = "";
+  if (!isSafeToken(command)) {
+    throw new Error(`Unsafe command detected: ${command}`);
+  }
+  for (const a of args) {
+    if (typeof a !== "string" || !isSafeToken(a)) {
+      throw new Error(`Unsafe argument detected: ${a}`);
+    }
+  }
   try {
-    await (0, import_exec.exec)(command, args, {
-      silent: true,
-      listeners: {
-        stdout: (data) => {
-          output += data.toString();
-        },
-        stderr: (data) => {
-          output += data.toString();
-        },
-        errline: (data) => {
-          errorOut(data, command === "yarn");
-        }
-      }
+    const child = (0, import_child_process.spawn)(command, args, { shell: false });
+    child.stdout?.on("data", (data) => {
+      output += data.toString();
     });
+    child.stderr?.on("data", (data) => {
+      output += data.toString();
+    });
+    const exitCode = await new Promise((resolve, reject) => {
+      child.on("error", (err) => reject(err));
+      child.on("close", (code) => resolve(code ?? 0));
+    });
+    if (exitCode !== 0) {
+      errorOut(output, command === "yarn");
+    }
     return output.trim();
   } catch (error) {
     errorOut(error);
@@ -91,14 +100,15 @@ var action = async () => {
     } else if (GITHUB_SHA) {
       commit = GITHUB_SHA;
     } else {
-      commit = await run("git", ["rev-parse", "HEAD"]);
+      commit = await run("git", ["rev-parse", "HEAD"]) ?? "";
     }
     core2.debug(`commit: ${commit}`);
-    const main = (await run("git", ["log", ref])).split("\n")[0].split(" ")[1];
+    const mainLog = await run("git", ["log", ref]) ?? "";
+    const main = mainLog?.split("\n")[0]?.split(" ")[1] || "";
     core2.debug(`main: ${main}`);
     const base = await run("git", ["merge-base", main, commit]);
     core2.debug(`base: ${base}`);
-    const tree = await run("git", ["merge-tree", base, main, commit]);
+    const tree = await run("git", ["merge-tree", base, main, commit]) ?? "";
     core2.debug(`tree: ${tree}`);
     const filters = /^ {2}our|^ {2}their/;
     const diff = tree.split("\n").filter((line) => filters.test(line)).map((line) => line.replace(/\s+/g, " ").split(" ")[4]).join(" ");
@@ -109,9 +119,7 @@ var action = async () => {
     core2.setFailed(error.message);
   }
 };
-(async () => {
-  await action();
-})();
+void action();
 // Annotate the CommonJS export names for ESM import in node:
 0 && (module.exports = {
   action
