@@ -6,11 +6,12 @@ on:
       - 'CI - lint & tests'
     types:
       - completed
+    branches: [main]
+
   workflow_dispatch:
 
 permissions:
-  contents: read
-  pull-requests: read
+  contents: write
 
 jobs:
   release:
