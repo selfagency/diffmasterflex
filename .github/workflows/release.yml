@@ -7,7 +7,6 @@ on:
     types:
       - completed
     branches: [main]
-
   workflow_dispatch:
 
 permissions:
@@ -31,14 +30,14 @@ jobs:
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v6
-        with:
-          node-version: '22'
+      - name: Get diff
+        id: diff
+        uses: ./
 
       - name: Check package version
         id: check
         uses: 'EndBug/version-check@v2'
+        if: ${{ contains('package.json', steps.diff.outputs.diff) }}
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           diff-search: true
