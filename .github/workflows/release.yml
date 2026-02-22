@@ -34,13 +34,54 @@ jobs:
         id: diff
         uses: ./
 
-      - name: Check package version
+      - name: Determine previous and head revisions
+        id: prev
+        run: |
+          # Ensure we have history to reference parent commits
+          git fetch --prune --unshallow || true
+
+          # Head SHA for this workflow_run (provided by the triggering workflow)
+          echo "head_rev=${{ github.event.workflow_run.head_sha }}" >> $GITHUB_OUTPUT
+
+          # Prefer using the commit of the last release tag as the "previous" revision
+          # This makes changelog/version comparisons robust across merged histories.
+          prev_tag=$(git describe --tags --abbrev=0 2>/dev/null || true)
+          if [ -n "$prev_tag" ]; then
+            prev=$(git rev-list -n 1 "$prev_tag")
+          else
+            # fallback to parent of head
+            prev=$(git rev-parse "${{ github.event.workflow_run.head_sha }}^" 2>/dev/null || git rev-parse HEAD^)
+          fi
+          echo "prev_rev=$prev" >> $GITHUB_OUTPUT
+
+      - name: Check package version (compare package.json between revisions)
         id: check
-        uses: 'EndBug/version-check@v2'
         if: ${{ contains('package.json', steps.diff.outputs.diff) }}
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          diff-search: true
+        run: |
+          set -euo pipefail
+          head_rev=${{ steps.prev.outputs.head_rev }}
+          prev_rev=${{ steps.prev.outputs.prev_rev }}
+
+          echo "Checking package.json between $prev_rev and $head_rev"
+
+          # Try to read package.json at both revisions; if missing treat as empty
+          prev_json=$(git show "$prev_rev:package.json" 2>/dev/null || echo '{}')
+          head_json=$(git show "$head_rev:package.json" 2>/dev/null || echo '{}')
+
+          # Extract versions using node to avoid relying on jq availability
+          prev_ver=$(node -e "try{console.log(JSON.parse(process.argv[1]).version||'')}catch(e){console.log('')}" "$prev_json")
+          head_ver=$(node -e "try{console.log(JSON.parse(process.argv[1]).version||'')}catch(e){console.log('')}" "$head_json")
+
+          if [ -z "$head_ver" ]; then
+            echo "changed=false" >> $GITHUB_OUTPUT
+          else
+            if [ "$head_ver" != "$prev_ver" ]; then
+              echo "changed=true" >> $GITHUB_OUTPUT
+              echo "version=$head_ver" >> $GITHUB_OUTPUT
+            else
+              echo "changed=false" >> $GITHUB_OUTPUT
+            fi
+          fi
 
       - name: Generate changelog
         id: generate_changelog
