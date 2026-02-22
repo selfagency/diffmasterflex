@@ -1,7 +1,7 @@
-import core from '@actions/core';
-import { run } from './util';
+import * as core from '@actions/core';
+import { run } from './util.js';
 
-const action = async () => {
+export const action = async () => {
   try {
     // get environment variables
     const { GITHUB_SHA } = process.env;
@@ -19,12 +19,13 @@ const action = async () => {
     } else if (GITHUB_SHA) {
       commit = GITHUB_SHA;
     } else {
-      commit = await run('git', ['rev-parse', 'HEAD']);
+      commit = (await run('git', ['rev-parse', 'HEAD'])) ?? '';
     }
     core.debug(`commit: ${commit}`);
 
     // get the HEAD of the main branch
-    const main = (await run('git', ['log', ref])).split('\n')[0].split(' ')[1];
+    const mainLog = (await run('git', ['log', ref])) ?? '';
+    const main = mainLog?.split('\n')[0]?.split(' ')[1] || '';
     core.debug(`main: ${main}`);
 
     // diff step 1
@@ -32,7 +33,7 @@ const action = async () => {
     core.debug(`base: ${base}`);
 
     // diff step 2
-    const tree = await run('git', ['merge-tree', base, main, commit]);
+    const tree = (await run('git', ['merge-tree', base, main, commit])) ?? '';
     core.debug(`tree: ${tree}`);
 
     // diff step 3
@@ -52,6 +53,4 @@ const action = async () => {
   }
 };
 
-(async () => {
-  await action();
-})();
+(void action());

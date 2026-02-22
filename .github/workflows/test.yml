@@ -1,23 +1,58 @@
-name: Test
+name: CI - lint & tests
+
 on:
   push:
-    branches:
-      - dev
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
 jobs:
-  test_action:
-    name: Test action
+  lint:
+    name: Lint
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repo
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
         with:
-          fetch-depth: 0
+          node-version: 20
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Lint (tsc, eslint, prettier)
+        run: pnpm run lint
 
-      - name: Diff
-        id: diff
-        uses: 'selfagency/diffmasterflex@main'
-
-      - run: |
-          echo ${{ steps.diff.outputs.changed }}
-          echo ${{ steps.diff.outputs.diff }}
-
+  test:
+    name: Tests
+    needs: lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: pnpm/action-setup@v4
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Cache pnpm store
+        uses: actions/cache@v4
+        with:
+          path: ~/.pnpm-store
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+      - name: Install
+        run: pnpm install --frozen-lockfile
+      - name: Build (typecheck)
+        run: pnpm run build
+      - name: Run tests
+        run: pnpm test -- --run
+      - name: Bundle (build artifact)
+        # 'bundle' script was missing in package.json; run the existing build step instead
+        run: pnpm run build
